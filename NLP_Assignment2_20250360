@@ -403,7 +403,7 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 13,
       "id": "6ed1a575",
       "metadata": {
         "id": "6ed1a575"
@@ -429,7 +429,7 @@
         "\n",
         "    TODO: Complete this function\n",
         "    \"\"\"\n",
-        "    return\n",
+        "    return len(self.paths)\n",
         "\n",
         "  def __getitem__(self, idx:int) -> Tuple[List[str], int]:\n",
         "    \"\"\"\n",
@@ -449,7 +449,19 @@
         "    TODO: Complete this function using self.paths, self.tokenizer, and read_txt()\n",
         "    \"\"\"\n",
         "\n",
-        "    return\n",
+        "    target_path = self.paths[idx]\n",
+        "\n",
+        "    path_str = str(target_path)\n",
+        "    if 'pos' in path_str.split('/') or 'pos' in path_str.split('\\\\'):\n",
+        "        label = 1\n",
+        "    else:\n",
+        "        label = 0\n",
+        "\n",
+        "    txt_content = read_txt(target_path)\n",
+        "\n",
+        "    sequence_of_token = self.tokenizer(txt_content)\n",
+        "\n",
+        "    return sequence_of_token, label\n",
         "\n",
         "trainset = IMDbData(train_pths)\n",
         "validset = IMDbData(valid_pths)\n",
@@ -462,12 +474,27 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 14,
       "id": "345935b6",
       "metadata": {
-        "id": "345935b6"
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "345935b6",
+        "outputId": "19408bcc-9790-43d4-becb-98008933c6e7"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['this', 'is', 'my', 'example', 'sentence', '!', '!']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 14
+        }
+      ],
       "source": [
         "'''\n",
         "Examples of how tokenizer works\n",
@@ -477,12 +504,24 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 15,
       "id": "d73b5f1a",
       "metadata": {
-        "id": "d73b5f1a"
+        "id": "d73b5f1a",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "e2b249a6-76ea-4281-8275-498041abbeb8"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passed all the test cases!\n"
+          ]
+        }
+      ],
       "source": [
         "'''\n",
         "Test your IMDbData class\n",
@@ -510,12 +549,27 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 19,
       "id": "1dac770a",
       "metadata": {
-        "id": "1dac770a"
+        "id": "1dac770a",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "6ce5b9ae-5301-4235-b05a-4851989a4526"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Input sentence: ['yowza', '!', 'if', 'anyone', 'who', 'loves', 'laurel', 'and', 'hardy', 'can', 'watch', 'this', 'movie', 'and', 'feel', 'good', 'about', 'it', ',', 'you']\n",
+            "Converted sentence: [27030, 0, 11987, 1487, 26426, 14417, 13830, 1310, 11072, 3792, 26166, 24238, 15911, 1310, 9041, 10407, 551, 12881, 76, 26889]\n",
+            "Re-converted sentence: ['UNKNOWN', '!', 'if', 'anyone', 'who', 'loves', 'laurel', 'and', 'hardy', 'can', 'watch', 'this', 'movie', 'and', 'feel', 'good', 'about', 'it', ',', 'you']\n",
+            "Result for a list of sentences/ input_list: [['after', 'watching', 'about', 'half', 'of'], ['reading', 'all', 'of', 'the', 'comments'], ['why', 'has', 'this', 'not', 'been'], ['this', 'is', 'a', 'really', 'strange']], output_list: [[902, 26173, 551, 10912, 16765], [19394, 1092, 16765, 24153, 5020], [26447, 11120, 24238, 16550, 2483], [24238, 12847, 493, 19419, 23088]]\n"
+          ]
+        }
+      ],
       "source": [
         "class Str2Idx2Str:\n",
         "  def __init__(self, vocab: List[str]):\n",
@@ -534,8 +588,8 @@
         "    - e.g. self.str2idx[your_word] returns an integer value of the index of your_word in the vocabulary\n",
         "\n",
         "    '''\n",
-        "    self.idx2str = []\n",
-        "    self.str2idx = {}\n",
+        "    self.idx2str = list(vocab)\n",
+        "    self.str2idx = {word: idx for idx, word in enumerate(self.idx2str)}\n",
         "\n",
         "\n",
         "    '''\n",
@@ -582,8 +636,19 @@
         "\n",
         "    # Write your code from here\n",
         "\n",
+        "    if isinstance(alist, str):\n",
+        "        return self.str2idx.get(alist, self.unknown_idx)\n",
         "\n",
-        "    return\n",
+        "    elif isinstance(alist, int):\n",
+        "        if 0 <= alist < len(self.idx2str):\n",
+        "            return self.idx2str[alist]\n",
+        "        else:\n",
+        "            return \"UNKNOWN\"\n",
+        "\n",
+        "    elif isinstance(alist, list):\n",
+        "        return [self(item) for item in alist]\n",
+        "\n",
+        "\n",
         "\n",
         "# Test the code\n",
         "converter = Str2Idx2Str(vocab)\n",
@@ -597,12 +662,24 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 21,
       "id": "4edac0e1",
       "metadata": {
-        "id": "4edac0e1"
+        "id": "4edac0e1",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "843669cb-271d-4e75-bbaf-681a0b0cd2b6"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passed all the test cases!\n"
+          ]
+        }
+      ],
       "source": [
         "'''\n",
         "Test your code by running this cell.\n",
@@ -649,12 +726,65 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 22,
       "id": "85545f25",
       "metadata": {
-        "id": "85545f25"
+        "id": "85545f25",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "5373e050-5ee4-4445-9c16-3cdd1e63dffd"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "A batch looks like this:  (PackedSequence(data=tensor([19419, 24153, 24153,  ..., 24147,    94,   326]), batch_sizes=tensor([32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,\n",
+            "        32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,\n",
+            "        32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,\n",
+            "        32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 31, 31, 31, 31, 31, 31,\n",
+            "        31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31,\n",
+            "        30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,\n",
+            "        30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 29, 29, 29, 29, 29, 29, 29,\n",
+            "        29, 29, 29, 29, 29, 29, 29, 29, 29, 27, 27, 27, 25, 23, 22, 22, 22, 22,\n",
+            "        22, 22, 22, 22, 22, 22, 22, 22, 22, 21, 21, 21, 21, 20, 20, 20, 20, 20,\n",
+            "        18, 18, 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 16, 16, 16, 16, 16, 16,\n",
+            "        15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14,\n",
+            "        14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,\n",
+            "        14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 13, 12, 12, 12, 12, 12,\n",
+            "        12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 11,\n",
+            "        11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10,  9,  9,  9,  9,\n",
+            "         9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,\n",
+            "         9,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,\n",
+            "         8,  8,  8,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,\n",
+            "         7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,\n",
+            "         7,  7,  7,  7,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,\n",
+            "         6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,\n",
+            "         5,  5,  5,  5,  5,  5,  4,  4,  4,  4,  4,  3,  3,  3,  3,  3,  3,  3,\n",
+            "         3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,\n",
+            "         3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,\n",
+            "         3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,\n",
+            "         3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,\n",
+            "         2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,\n",
+            "         2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,\n",
+            "         2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,\n",
+            "         2,  2,  2,  2,  2,  2,  2,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,\n",
+            "         1,  1]), sorted_indices=tensor([18,  3, 28, 11, 19,  9, 17,  4,  6,  1,  7, 10, 26, 13, 29,  5, 27, 16,\n",
+            "        21, 24, 12, 25, 20, 22, 14,  0, 23, 15,  8, 30,  2, 31]), unsorted_indices=tensor([25,  9, 30,  1,  7, 15,  8, 10, 28,  5, 11,  3, 20, 13, 24, 27, 17,  6,\n",
+            "         0,  4, 22, 18, 23, 26, 19, 21, 12, 16,  2, 14, 29, 31])), tensor([0., 1., 0., 1., 1., 0., 0., 0., 1., 0., 0., 0., 1., 1., 0., 0., 0., 0.,\n",
+            "        0., 0., 1., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]))\n"
+          ]
+        }
+      ],
       "source": [
         "import torch\n",
         "from torch.utils.data import DataLoader\n",
@@ -675,8 +805,8 @@
         "    '''\n",
         "\n",
         "    # Write your code from here\n",
-        "    word_sentences_in_idxs = [] # you have to change this\n",
-        "    label_tensor = torch.FloatTensor([0]) # you have to change this\n",
+        "    word_sentences_in_idxs = [torch.LongTensor(self.converter(sample[0])) for sample in batch] # you have to change this\n",
+        "    label_tensor = torch.FloatTensor([sample[1] for sample in batch]) # you have to change this\n",
         "\n",
         "\n",
         "    '''\n",
@@ -712,12 +842,29 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 11,
       "id": "fa84a216",
       "metadata": {
-        "id": "fa84a216"
+        "id": "fa84a216",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 228
+        },
+        "outputId": "299b6445-9447-4a3b-a1ff-0959f7b6048a"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'nn' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/2996624628.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0;32mclass\u001b[0m \u001b[0mSentimentModel\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mnn\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mModule\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m   \u001b[0;32mdef\u001b[0m \u001b[0m__init__\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0mvocab_size\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mhidden_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m128\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mnum_layers\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m3\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m     \u001b[0msuper\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m__init__\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m     \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mword_embedding\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnn\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mEmbedding\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mvocab_size\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mhidden_size\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m     \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mgru\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnn\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mGRU\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mhidden_size\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mhidden_size\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mnum_layers\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mnum_layers\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbidirectional\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mTrue\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdropout\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m0.3\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbatch_first\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mTrue\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'nn' is not defined"
+          ]
+        }
+      ],
       "source": [
         "class SentimentModel(nn.Module):\n",
         "  def __init__(self,vocab_size, hidden_size=128, num_layers=3):\n",
@@ -761,12 +908,29 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 4,
       "id": "90e39022",
       "metadata": {
-        "id": "90e39022"
+        "id": "90e39022",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 245
+        },
+        "outputId": "a51927b9-b247-453c-faab-77aebe312167"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'torch' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/55616158.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0;32mdef\u001b[0m \u001b[0mget_binary_cross_entropy_loss\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mpred\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mFloatTensor\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtarget\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mFloatTensor\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0meps\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m1e-8\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m->\u001b[0m \u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mFloatTensor\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m   '''\n\u001b[1;32m      3\u001b[0m   \u001b[0mpred\u001b[0m \u001b[0;34m(\u001b[0m\u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mFloatTensor\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mPrediction\u001b[0m \u001b[0mvalue\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mN\u001b[0m \u001b[0msamples\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m                             \u001b[0mEach\u001b[0m \u001b[0melement\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mthe\u001b[0m \u001b[0mtensor\u001b[0m \u001b[0;32mis\u001b[0m \u001b[0mthe\u001b[0m \u001b[0moutput\u001b[0m \u001b[0mof\u001b[0m \u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0msigmoid\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;32mand\u001b[0m \u001b[0mhas\u001b[0m \u001b[0ma\u001b[0m \u001b[0mvalue\u001b[0m \u001b[0mbetween\u001b[0m \u001b[0;36m0\u001b[0m \u001b[0;32mand\u001b[0m \u001b[0;36m1\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m   \u001b[0mtarget\u001b[0m \u001b[0;34m(\u001b[0m\u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mFloatTensor\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mCorresponding\u001b[0m \u001b[0mtarget\u001b[0m \u001b[0mvalue\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mN\u001b[0m \u001b[0msamples\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'torch' is not defined"
+          ]
+        }
+      ],
       "source": [
         "def get_binary_cross_entropy_loss(pred:torch.FloatTensor, target:torch.FloatTensor, eps=1e-8) -> torch.FloatTensor:\n",
         "  '''\n",
@@ -781,17 +945,41 @@
         "  TODO: Complete this function\n",
         "\n",
         "  '''\n",
-        "  return"
+        "\n",
+        "  positive_loss = target * torch.log(pred + eps)\n",
+        "\n",
+        "  negative_loss = (1 - target) * torch.log(1 - pred + eps)\n",
+        "\n",
+        "  loss = -(positive_loss + negative_loss).mean()\n",
+        "\n",
+        "  return loss"
       ]
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 5,
       "id": "e99634eb",
       "metadata": {
-        "id": "e99634eb"
+        "id": "e99634eb",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 228
+        },
+        "outputId": "92271b3a-5155-4de0-cd55-c2860c1a0e2e"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'torch' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/2784872715.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      4\u001b[0m '''\n\u001b[1;32m      5\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 6\u001b[0;31m test_pred_case = torch.Tensor([9.9894e-01, 2.2645e-03, 1.8131e-01, 8.0153e-03, 9.9972e-01, 1.0378e-03,\n\u001b[0m\u001b[1;32m      7\u001b[0m         \u001b[0;36m9.9949e-01\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m9.9967e-01\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m6.4150e-03\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m9.9912e-01\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m9.9896e-01\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m1.4350e-01\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      8\u001b[0m         \u001b[0;36m9.9896e-01\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m2.1979e-02\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m9.9976e-01\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m4.5389e-03\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m9.9906e-01\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m1.0633e-02\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'torch' is not defined"
+          ]
+        }
+      ],
       "source": [
         "'''\n",
         "Test your BCE loss function\n",
@@ -847,20 +1035,39 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 6,
       "id": "7246fae3",
       "metadata": {
-        "id": "7246fae3"
+        "id": "7246fae3",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 211
+        },
+        "outputId": "5787e19c-c484-42e5-a011-eea6021d8933"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'SentimentModel' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/1017999841.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m    237\u001b[0m \u001b[0mDon\u001b[0m\u001b[0;31m'\u001b[0m\u001b[0mt\u001b[0m \u001b[0mchange\u001b[0m \u001b[0mthis\u001b[0m \u001b[0mpart\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    238\u001b[0m \"\"\"\n\u001b[0;32m--> 239\u001b[0;31m \u001b[0mmodel\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mSentimentModel\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mconverter\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0midx2str\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mhidden_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m128\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mnum_layers\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m3\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    240\u001b[0m \u001b[0moptimizer\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0moptim\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mAdam\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mparameters\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlr\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m1e-3\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    241\u001b[0m \u001b[0mtrain_loader\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mDataLoader\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mtrainset\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbatch_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m64\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcollate_fn\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mpack_collate\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mshuffle\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mTrue\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'SentimentModel' is not defined"
+          ]
+        }
+      ],
       "source": [
+        "import torch\n",
+        "from torch.utils.data import DataLoader\n",
         "from tqdm.auto import tqdm\n",
         "\n",
         "class Trainer:\n",
         "  def __init__(self, model, optimizer, loss_fn, train_loader, valid_loader, device):\n",
         "    self.model = model\n",
         "    self.optimizer = optimizer\n",
-        "    self.loss_fn = torch.nn.BCELoss()\n",
+        "    self.loss_fn = loss_fn # Use the passed loss_fn argument\n",
         "    self.train_loader = train_loader\n",
         "    self.valid_loader = valid_loader\n",
         "\n",
@@ -912,8 +1119,15 @@
         "\n",
         "    TODO: Complete this method using all the input arguments\n",
         "    '''\n",
+        "    predicted_classes = (pred >= threshold).float()\n",
         "\n",
-        "    return\n",
+        "    correct_predictions = (predicted_classes == target).float()\n",
+        "\n",
+        "    accuracy = correct_predictions.mean().item()\n",
+        "\n",
+        "    return accuracy\n",
+        "\n",
+        "\n",
         "\n",
         "  def _get_loss_and_acc_from_single_batch(self, batch):\n",
         "    '''\n",
@@ -935,7 +1149,18 @@
         "    TODO: Complete this method\n",
         "    '''\n",
         "\n",
-        "    return\n",
+        "    inputs, labels = batch\n",
+        "\n",
+        "    inputs = inputs.to(self.device)\n",
+        "\n",
+        "    labels = labels.to(self.device).float()\n",
+        "\n",
+        "    predictions = self.model(inputs).squeeze()\n",
+        "\n",
+        "    loss = self.loss_fn(predictions, labels)\n",
+        "    acc = self._get_accuracy(predictions, labels)\n",
+        "\n",
+        "    return loss, acc\n",
         "\n",
         "  def _train_by_single_batch(self, batch):\n",
         "    '''\n",
@@ -955,11 +1180,14 @@
         "\n",
         "    TODO: Complete this method\n",
         "    '''\n",
-        "    return\n",
-        "\n",
-        "\n",
+        "    self.optimizer.zero_grad()\n",
+        "    loss, acc = self._get_loss_and_acc_from_single_batch(batch)\n",
+        "    loss.backward()\n",
+        "    self.optimizer.step()\n",
+        "    return loss.item(), acc\n",
         "\n",
         "  def validate(self, external_loader=None):\n",
+        "\n",
         "    '''\n",
         "    This method calculates accuracy and loss for given data loader.\n",
         "    It can be used for validation step, or to get test set result\n",
@@ -992,10 +1220,21 @@
         "    '''\n",
         "    Write your code from here, using loader, self.model, self.loss_fn.\n",
         "    '''\n",
+        "    total_loss = 0.0\n",
+        "    total_acc = 0.0\n",
+        "    num_batches = len(loader)\n",
         "\n",
-        "    return\n",
+        "    with torch.no_grad():\n",
+        "      for batch in loader:\n",
         "\n",
+        "        loss, acc = self._get_loss_and_acc_from_single_batch(batch)\n",
+        "        total_loss += loss.item()\n",
+        "        total_acc += acc\n",
         "\n",
+        "        validation_loss = total_loss / num_batches\n",
+        "    validation_accuracy = total_acc / num_batches\n",
+        "\n",
+        "    return validation_loss, validation_accuracy\n",
         "\n",
         "\n",
         "\"\"\"\n",
@@ -1024,12 +1263,29 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 7,
       "id": "a8db5dae",
       "metadata": {
-        "id": "a8db5dae"
+        "id": "a8db5dae",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 211
+        },
+        "outputId": "542c203c-4ac2-4801-8251-f5ade3116478"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'trainer' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/3295292742.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      5\u001b[0m \"\"\"\n\u001b[1;32m      6\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 7\u001b[0;31m \u001b[0mtrainer\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mtrain\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      8\u001b[0m \u001b[0mtrain_batch\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnext\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0miter\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mtrainer\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mtrain_loader\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;31m# get a batch from train_loader\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      9\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'trainer' is not defined"
+          ]
+        }
+      ],
       "source": [
         "\"\"\"\n",
         "This code is to test trainer._train_by_single_batch\n",
@@ -1051,12 +1307,29 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 10,
       "id": "e9dc9edf",
       "metadata": {
-        "id": "e9dc9edf"
+        "id": "e9dc9edf",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 211
+        },
+        "outputId": "de28dd84-9da9-43d4-e534-cf8496e7e28d"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'DataLoader' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/1654258068.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      3\u001b[0m \"\"\"\n\u001b[1;32m      4\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 5\u001b[0;31m \u001b[0mshort_valid_loader\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mDataLoader\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mshort_validset\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbatch_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m50\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcollate_fn\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mpack_collate\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      6\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      7\u001b[0m \u001b[0mvalidation_loss\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mvalidation_acc\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mtrainer\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mvalidate\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mshort_valid_loader\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'DataLoader' is not defined"
+          ]
+        }
+      ],
       "source": [
         "\"\"\"\n",
         "This code is to test trainer.validate\n",
@@ -1090,25 +1363,59 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 9,
       "id": "29853df0",
       "metadata": {
         "id": "29853df0",
-        "scrolled": true
+        "scrolled": true,
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 141
+        },
+        "outputId": "fc290681-a3ba-4dab-cc55-fd26fb6514cd"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'trainer' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/4073680185.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mtrainer\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mtrain_by_num_epoch\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m5\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'trainer' is not defined"
+          ]
+        }
+      ],
       "source": [
         "trainer.train_by_num_epoch(5)"
       ]
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 8,
       "id": "3987770b",
       "metadata": {
-        "id": "3987770b"
+        "id": "3987770b",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 211
+        },
+        "outputId": "7bf6c5e2-2188-4527-9c80-0f5bc1cc919c"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'plt' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/4120956838.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      3\u001b[0m '''\n\u001b[1;32m      4\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 5\u001b[0;31m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfigure\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mfigsize\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m10\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;36m8\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      6\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      7\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0msubplot\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m4\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'plt' is not defined"
+          ]
+        }
+      ],
       "source": [
         "'''\n",
         "Plot the result after the training\n",
@@ -1170,12 +1477,24 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 12,
       "id": "85fa99b7",
       "metadata": {
-        "id": "85fa99b7"
+        "id": "85fa99b7",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "4450ccf0-eec6-4d93-85fa-977281e33b52"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "python3: can't open file '/content/NLP_Assignment_2.py': [Errno 2] No such file or directory\n"
+          ]
+        }
+      ],
       "source": [
         "!python3 NLP_Assignment_2.py"
       ]
@@ -1215,12 +1534,29 @@
     },
     {
       "cell_type": "code",
-      "execution_count": null,
+      "execution_count": 13,
       "id": "bf4f40e9",
       "metadata": {
-        "id": "bf4f40e9"
+        "id": "bf4f40e9",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 193
+        },
+        "outputId": "8bc5df06-0e8e-40ce-e0df-d82a4bc689a8"
       },
-      "outputs": [],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'SentimentModel' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipykernel_1452/3286365119.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mmodel\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mSentimentModel\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mconverter\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0midx2str\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m128\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m3\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;31m# You have to use the same model architecture as the one you used for training\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0myour_model_pt_path\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m'imdb_sentiment_model_last.pt'\u001b[0m \u001b[0;31m# or imdb_sentiment_model_best.pt\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m \u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mload_state_dict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mtorch\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mload\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0myour_model_pt_path\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mmap_location\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'cpu'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'model'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'SentimentModel' is not defined"
+          ]
+        }
+      ],
       "source": [
         "model = SentimentModel(len(converter.idx2str), 128, 3) # You have to use the same model architecture as the one you used for training\n",
         "your_model_pt_path = 'imdb_sentiment_model_last.pt' # or imdb_sentiment_model_best.pt\n",
